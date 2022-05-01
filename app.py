@@ -1,19 +1,21 @@
-from aiogram import executor
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils import executor
 
-from loader import dp
-import middlewares, filters, handlers
-from utils.notify_admins import on_startup_notify
-from utils.set_bot_commands import set_default_commands
+from config import TOKEN
+
+bot = Bot(token=TOKEN)
+dp = Dispatcher(bot)
 
 
-async def on_startup(dispatcher):
-    # Устанавливаем дефолтные команды
-    await set_default_commands(dispatcher)
+@dp.message_handler(commands=['start'])
+async def process_start_command(message: types.Message):
+    await message.reply("Напиши мне что-нибудь, и я отпрпавлю этот текст тебе в ответ!")
 
-    # Уведомляет про запуск
-    await on_startup_notify(dispatcher)
 
+@dp.message_handler()
+async def echo_message(msg: types.Message):
+    await bot.send_message(msg.from_user.id, msg.text)
 
 if __name__ == '__main__':
-    executor.start_polling(dp, on_startup=on_startup)
-
+    executor.start_polling(dp)
